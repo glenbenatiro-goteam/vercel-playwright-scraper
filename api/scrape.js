@@ -7,16 +7,20 @@ module.exports = async (req, res) => {
   let browser;
 
   // Extract the URL from the request body.
-  // The request body is expected to be a JSON object like { "url": "..." }.
   const { url } = req.body;
   if (!url) {
     // If no URL is provided, return a 400 Bad Request error.
+    console.error("Error: No URL provided in the request body.");
     return res
       .status(400)
       .json({ error: "URL is required in the request body." });
   }
 
   try {
+    console.log("Starting scraper...");
+    console.log(`Received URL: ${url}`);
+
+    console.log("Attempting to launch browser...");
     // Launch a headless browser using the specialized Chromium binary.
     // This is crucial for running Playwright in a serverless environment like Vercel.
     browser = await playwright.chromium.launch({
@@ -24,18 +28,25 @@ module.exports = async (req, res) => {
       executablePath: await chromium.executablePath,
       headless: chromium.headless,
     });
+    console.log("Browser launched successfully.");
 
+    console.log("Creating a new page...");
     // Create a new browser context and a new page.
     const page = await browser.newPage();
-    await page.goto(url, { waitUntil: "domcontentloaded" });
-    console.log(`Mapsd to: ${page.url()}`);
+    console.log("New page created.");
 
+    console.log("Navigating to the provided URL...");
+    await page.goto(url, { waitUntil: "domcontentloaded", timeout: 30000 });
+    console.log("Navigation successful.");
+
+    console.log("Scraping page content...");
     // Scrape the desired content.
     // For this example, we'll extract the page title and all H1 tags.
     const pageTitle = await page.title();
     const headings = await page.$$eval("h1", (elements) => {
       return elements.map((el) => el.textContent.trim());
     });
+    console.log("Scraping complete.");
 
     // Return the scraped data as a JSON response.
     res.status(200).json({
@@ -51,7 +62,9 @@ module.exports = async (req, res) => {
   } finally {
     // Always close the browser instance to free up resources.
     if (browser) {
+      console.log("Closing browser...");
       await browser.close();
+      console.log("Browser closed.");
     }
   }
 };
