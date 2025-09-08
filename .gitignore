@@ -1,0 +1,14 @@
+# Node.js dependencies
+/node_modules
+
+# Vercel-specific files
+.vercel/
+
+# Environment variables file
+.env
+
+# macOS system files (often committed by mistake)
+.DS_Store
+
+# Log files
+npm-debug.log*
