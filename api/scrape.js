@@ -25,7 +25,7 @@ module.exports = async (req, res) => {
     // This is crucial for running Playwright in a serverless environment like Vercel.
     browser = await playwright.chromium.launch({
       args: chromium.args,
-      executablePath: await chromium.executablePath,
+      executablePath: await chromium.executablePath(), // <-- The fix is here
       headless: chromium.headless,
     });
     console.log("Browser launched successfully.");
